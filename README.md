@@ -287,6 +287,10 @@ After running `npm run seed`, use these accounts to explore all features:
 
 ## 🌐 Deployment
 
+### Live Website
+
+[Open HireNest Elite](https://hire-nest-job-portal-chi.vercel.app)
+
 ### Frontend — Vercel
 
 1. Push your code to GitHub
