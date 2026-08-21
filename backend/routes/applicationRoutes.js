@@ -4,12 +4,8 @@ const applicationController = require('../controllers/applicationController');
 const { authenticate, authorize, requireApproval } = require('../middlewares/auth');
 const { applicationStatusRules, mongoIdParam } = require('../middlewares/validate');
 
-router.post(
-  '/:jobId',
-  authenticate,
-  authorize('candidate'),
-  applicationController.applyToJob
-);
+// ⚠️ IMPORTANT: Specific named routes MUST come before wildcard /:id routes
+// Otherwise Express will match /my, /stats, /analytics as /:jobId
 
 router.get(
   '/my',
@@ -26,17 +22,24 @@ router.get(
 );
 
 router.get(
+  '/analytics',
+  authenticate,
+  authorize('recruiter'),
+  applicationController.getRecruiterAnalytics
+);
+
+router.get(
   '/job/:jobId',
   authenticate,
   authorize('recruiter', 'admin'),
   applicationController.getJobApplicants
 );
 
-router.get(
-  '/analytics',
+router.post(
+  '/:jobId',
   authenticate,
-  authorize('recruiter'),
-  applicationController.getRecruiterAnalytics
+  authorize('candidate'),
+  applicationController.applyToJob
 );
 
 router.put(

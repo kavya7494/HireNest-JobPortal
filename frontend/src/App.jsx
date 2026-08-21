@@ -1,7 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { useEffect } from 'react';
 import useSocket from './hooks/useSocket';
+import { getMe } from './features/auth/authSlice';
 
 import AuthLayout from './layouts/AuthLayout';
 import MainLayout from './layouts/MainLayout';
@@ -31,6 +33,20 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminAnalytics from './pages/admin/AdminAnalytics';
 
+// Redirect logged-in users from home page to their dashboard
+const HomeRedirect = () => {
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
+  if (isAuthenticated && user) {
+    const redirectMap = {
+      candidate: '/candidate/dashboard',
+      recruiter: '/recruiter/dashboard',
+      admin: '/admin/dashboard',
+    };
+    return <Navigate to={redirectMap[user.role] || '/'} replace />;
+  }
+  return <Home />;
+};
+
 const AuthRedirect = ({ children }) => {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   if (isAuthenticated && user) {
@@ -45,7 +61,30 @@ const AuthRedirect = ({ children }) => {
 };
 
 const App = () => {
+  const dispatch = useDispatch();
+  const { isVerifying } = useSelector((state) => state.auth);
   useSocket();
+
+  // On every fresh page load, verify the stored token with the backend.
+  // If invalid/expired → getMe.rejected clears localStorage and forces login.
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      dispatch(getMe());
+    }
+  }, [dispatch]);
+
+  // Block rendering until token verification is complete
+  if (isVerifying) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-secondary-950">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-4 border-primary-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-gray-500 dark:text-gray-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <BrowserRouter>

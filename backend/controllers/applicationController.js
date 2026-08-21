@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Application = require('../models/Application');
 const Job = require('../models/Job');
 const User = require('../models/User');
@@ -82,6 +83,8 @@ exports.getMyApplications = async (req, res, next) => {
     const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
 
     const filter = { candidate: req.user.id };
+    console.log("MY APPLICATIONS USER ID:", req.user.id);
+    console.log("MY APPLICATIONS FILTER:", filter);
     if (status) filter.status = status;
 
     const [applications, total] = await Promise.all([
@@ -97,6 +100,8 @@ exports.getMyApplications = async (req, res, next) => {
         .lean(),
       Application.countDocuments(filter),
     ]);
+    console.log("MY APPLICATIONS FOUND:", applications.length);
+    console.log("MY APPLICATIONS TOTAL:", total);
 
     sendPaginated(res, 200, 'Applications retrieved', applications, page, limit, total);
   } catch (error) {
@@ -207,10 +212,10 @@ exports.updateApplicationStatus = async (req, res, next) => {
 
 exports.getApplicationStats = async (req, res, next) => {
   try {
-    const candidateId = req.user.id;
+    const candidateId = new mongoose.Types.ObjectId(req.user.id);
 
     const stats = await Application.aggregate([
-      { $match: { candidate: req.user._id } },
+      { $match: { candidate: candidateId } },
       {
         $group: {
           _id: '$status',

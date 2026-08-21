@@ -22,7 +22,6 @@ const CandidateApplications = () => {
   useEffect(() => {
     dispatch(fetchMyApplications());
   }, [dispatch]);
-
   const filtered =
     statusFilter === 'all' ? applications : applications.filter((a) => a.status === statusFilter);
 
@@ -161,6 +160,8 @@ const CandidateApplications = () => {
           </AnimatePresence>
         </div>
       )}
+
+      
     </div>
   );
 };

@@ -38,7 +38,7 @@ const userSchema = new mongoose.Schema(
     },
     bio: {
       type: String,
-      maxlength: [500, 'Bio cannot exceed 500 characters'],
+      maxlength: [1000, 'Bio cannot exceed 1000 characters'],
     },
     location: {
       type: String,
@@ -55,10 +55,9 @@ const userSchema = new mongoose.Schema(
       set: (skills) => skills.map((s) => s.trim().toLowerCase()),
     },
     experience: {
-      type: Number,
-      min: 0,
-      max: 50,
-      default: 0,
+      type: String,
+      enum: ['', '0-1', '1-3', '3-5', '5-8', '8+'],
+      default: '',
     },
     education: {
       type: String,
@@ -73,6 +72,21 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
       maxlength: 200,
+    },
+    portfolio: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    linkedIn: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    github: {
+      type: String,
+      trim: true,
+      default: '',
     },
     companySize: {
       type: String,
@@ -167,7 +181,7 @@ userSchema.virtual('profileStrength').get(function () {
   if (this.location) strength += weights.location;
   if (this.skills && this.skills.length >= 3) strength += weights.skills;
   else if (this.skills && this.skills.length > 0) strength += weights.skills / 2;
-  if (this.experience > 0) strength += weights.experience;
+  if (this.experience && this.experience !== '') strength += weights.experience;
   if (this.education) strength += weights.education;
   if (this.resumeUrl) strength += weights.resumeUrl;
 

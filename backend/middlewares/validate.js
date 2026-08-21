@@ -63,8 +63,8 @@ const updateProfileRules = [
     .withMessage('Phone cannot exceed 20 characters'),
   body('bio')
     .optional()
-    .isLength({ max: 500 })
-    .withMessage('Bio cannot exceed 500 characters'),
+    .isLength({ max: 1000 })
+    .withMessage('Bio cannot exceed 1000 characters'),
   body('location')
     .optional()
     .trim()
@@ -76,8 +76,8 @@ const updateProfileRules = [
     .withMessage('Skills must be an array'),
   body('experience')
     .optional()
-    .isInt({ min: 0, max: 50 })
-    .withMessage('Experience must be between 0 and 50'),
+    .isIn(['', '0-1', '1-3', '3-5', '5-8', '8+'])
+    .withMessage('Invalid experience level'),
   body('education')
     .optional()
     .trim()

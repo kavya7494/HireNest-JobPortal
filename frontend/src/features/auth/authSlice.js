@@ -1,10 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import authApi from './authApi';
 
+// Read from localStorage but DO NOT trust it yet — token must be verified with backend first
+const tokenFromStorage = localStorage.getItem('accessToken') || null;
 const userFromStorage = localStorage.getItem('user')
   ? JSON.parse(localStorage.getItem('user'))
   : null;
-const tokenFromStorage = localStorage.getItem('accessToken') || null;
 
 export const register = createAsyncThunk('auth/register', async (userData, { rejectWithValue }) => {
   try {
@@ -111,7 +112,10 @@ const authSlice = createSlice({
   initialState: {
     user: userFromStorage,
     accessToken: tokenFromStorage,
-    isAuthenticated: !!tokenFromStorage,
+    // NEVER trust localStorage token blindly — always verify with backend first
+    isAuthenticated: false,
+    // true while we're checking the token with the backend on first load
+    isVerifying: !!tokenFromStorage,
     loading: false,
     error: null,
     otpEmail: null,
@@ -215,12 +219,19 @@ const authSlice = createSlice({
       })
       .addCase(getMe.fulfilled, (state, action) => {
         state.loading = false;
+        state.isVerifying = false;
         state.user = action.payload;
         state.isAuthenticated = true;
       })
-      .addCase(getMe.rejected, (state, action) => {
+      .addCase(getMe.rejected, (state) => {
+        // Token was invalid/expired — clear everything so user must log in again
         state.loading = false;
-        state.error = action.payload;
+        state.isVerifying = false;
+        state.isAuthenticated = false;
+        state.user = null;
+        state.accessToken = null;
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('user');
       })
       .addCase(updateProfile.pending, (state) => {
         state.loading = true;

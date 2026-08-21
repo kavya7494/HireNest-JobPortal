@@ -11,7 +11,7 @@ import {
   HiOutlineXCircle,
   HiOutlineArrowRight,
 } from 'react-icons/hi';
-import { fetchApplicationStats } from '../../features/applications/applicationsSlice';
+import { fetchApplicationStats, fetchMyApplications } from '../../features/applications/applicationsSlice';
 import { fetchSavedJobs } from '../../features/jobs/jobsSlice';
 import { formatRelativeTime } from '../../utils/helpers';
 import { STATUS_COLORS } from '../../utils/constants';
@@ -41,6 +41,7 @@ const CandidateDashboard = () => {
 
   useEffect(() => {
     dispatch(fetchApplicationStats());
+    dispatch(fetchMyApplications());
     dispatch(fetchSavedJobs());
   }, [dispatch]);
 
